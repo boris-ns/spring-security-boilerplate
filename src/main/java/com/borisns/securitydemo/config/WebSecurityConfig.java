@@ -54,18 +54,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+            .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
 
-                // Allow all users to access URLs that have 'public' in them
-                .authorizeRequests()
-                .antMatchers("**/public/**").permitAll()
+            // Allow all users to access URLs that have 'public' in them
+            // Allow auth
+            .authorizeRequests()
+            .antMatchers("**/public/**").permitAll()
+            .antMatchers("/auth/**").permitAll()
 
-                // All other requests must be authorized
-                .anyRequest().authenticated().and()
+            // All other requests must be authorized
+            .anyRequest().authenticated().and()
 
-                // Intercept every request with filter
-                .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, jwtUserDetailsService), BasicAuthenticationFilter.class);
+            // Intercept every request with filter
+            .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, jwtUserDetailsService), BasicAuthenticationFilter.class);
 
         http.csrf().disable();
     }
@@ -74,6 +76,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         // TokenAuthenticationFilter will ignore all URLs below
         web.ignoring().antMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "/favicon.ico", "/**/*.html", "/**/*.css", "/**/*.js");
+        web.ignoring().antMatchers(HttpMethod.POST, "/auth/login");
 
         // TokenAuthenticationFilter will ignore all paths that have 'public' in them
         web.ignoring().antMatchers(HttpMethod.GET, "/**/public/**");
