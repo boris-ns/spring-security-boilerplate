@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -69,33 +67,28 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshAuthenticationToken(HttpServletRequest request) {
-
+    public ResponseEntity<UserTokenState> refreshAuthenticationToken(HttpServletRequest request) {
         String token = tokenUtils.getToken(request);
         String username = this.tokenUtils.getUsernameFromToken(token);
         User user = (User) this.userDetailsService.loadUserByUsername(username);
 
-//        Device device = deviceProvider.getCurrentDevice(request);
-
         if (this.tokenUtils.canTokenBeRefreshed(token, user.getLastPasswordResetDate())) {
             String refreshedToken = tokenUtils.refreshToken(token);
             int expiresIn = tokenUtils.getExpiredIn();
+            UserTokenState newToken = new UserTokenState(refreshedToken, expiresIn);
 
-            return ResponseEntity.ok(new UserTokenState(refreshedToken, expiresIn));
+            return new ResponseEntity<>(newToken, HttpStatus.OK);
         } else {
-            UserTokenState userTokenState = new UserTokenState();
-            return ResponseEntity.badRequest().body(userTokenState);
+            UserTokenState emptyToken = new UserTokenState();
+            return new ResponseEntity<>(emptyToken, HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/change-password")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> changePassword(@RequestBody PasswordChanger passwordChanger) {
+    @PreAuthorize("hasRole('ROLE_USER')") // @NOTE: Maybe you will need to change this
+    public ResponseEntity changePassword(@RequestBody PasswordChanger passwordChanger) {
         userDetailsService.changePassword(passwordChanger.oldPassword, passwordChanger.newPassword);
-
-        Map<String, String> result = new HashMap<>();
-        result.put("result", "success");
-        return ResponseEntity.accepted().body(result);
+        return ResponseEntity.ok().build();
     }
 
     static class PasswordChanger {
