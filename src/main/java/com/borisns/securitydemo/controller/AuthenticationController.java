@@ -1,6 +1,6 @@
 package com.borisns.securitydemo.controller;
 
-import com.borisns.securitydemo.common.DeviceProvider;
+import com.borisns.securitydemo.dto.UserDTO;
 import com.borisns.securitydemo.model.User;
 import com.borisns.securitydemo.model.UserTokenState;
 import com.borisns.securitydemo.security.TokenUtils;
@@ -9,7 +9,6 @@ import com.borisns.securitydemo.service.impl.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mobile.device.Device;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,14 +35,11 @@ public class AuthenticationController {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
-    @Autowired
-    private DeviceProvider deviceProvider;
-
 
     @PostMapping("/login")
-    public ResponseEntity<UserTokenState> createAuthenticationToken(@RequestBody JwtAuthenticationRequest authenticationRequest,
-                                                       HttpServletResponse response, Device device)
-            throws AuthenticationException, IOException {
+    public ResponseEntity<UserDTO> login(@RequestBody JwtAuthenticationRequest authenticationRequest,
+                                                             HttpServletResponse response)
+            throws AuthenticationException {
 
         final Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
@@ -56,10 +51,13 @@ public class AuthenticationController {
 
         // Create token
         User user = (User) authentication.getPrincipal();
-        String jwt = tokenUtils.generateToken(user.getUsername(), device);
-        int expiresIn = tokenUtils.getExpiredIn(device);
+        String jwt = tokenUtils.generateToken(user.getUsername());
+        int expiresIn = tokenUtils.getExpiredIn();
 
-        return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
+        UserDTO userDto = new UserDTO(user);
+        userDto.setToken(new UserTokenState(jwt, expiresIn));
+
+        return ResponseEntity.ok(userDto);
     }
 
     @PostMapping("/refresh")
@@ -69,11 +67,11 @@ public class AuthenticationController {
         String username = this.tokenUtils.getUsernameFromToken(token);
         User user = (User) this.userDetailsService.loadUserByUsername(username);
 
-        Device device = deviceProvider.getCurrentDevice(request);
+//        Device device = deviceProvider.getCurrentDevice(request);
 
         if (this.tokenUtils.canTokenBeRefreshed(token, user.getLastPasswordResetDate())) {
-            String refreshedToken = tokenUtils.refreshToken(token, device);
-            int expiresIn = tokenUtils.getExpiredIn(device);
+            String refreshedToken = tokenUtils.refreshToken(token);
+            int expiresIn = tokenUtils.getExpiredIn();
 
             return ResponseEntity.ok(new UserTokenState(refreshedToken, expiresIn));
         } else {
