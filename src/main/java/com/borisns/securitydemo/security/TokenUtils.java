@@ -71,7 +71,7 @@ public class TokenUtils {
 
     private Date generateExpirationDate() {
 //        long expiresIn = device.isTablet() || device.isMobile() ? MOBILE_EXPIRES_IN : EXPIRES_IN;
-        return new Date(timeProvider.now().getTime() + EXPIRES_IN * 1000);
+        return new Date(timeProvider.now().getTime() + EXPIRES_IN * 10000);
     }
 
     /* Functions for refreshing JWT token */
