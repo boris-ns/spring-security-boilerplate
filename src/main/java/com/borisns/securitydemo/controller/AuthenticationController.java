@@ -1,16 +1,19 @@
 package com.borisns.securitydemo.controller;
 
 import com.borisns.securitydemo.dto.UserDTO;
+import com.borisns.securitydemo.exception.ApiRequestException;
 import com.borisns.securitydemo.model.User;
 import com.borisns.securitydemo.model.UserTokenState;
 import com.borisns.securitydemo.security.TokenUtils;
 import com.borisns.securitydemo.security.auth.JwtAuthenticationRequest;
 import com.borisns.securitydemo.service.impl.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -41,10 +44,15 @@ public class AuthenticationController {
                                                              HttpServletResponse response)
             throws AuthenticationException {
 
-        final Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.getUsername(),
-                        authenticationRequest.getPassword()));
+        Authentication authentication;
+        try {
+            authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(
+                            authenticationRequest.getUsername(),
+                            authenticationRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            throw new ApiRequestException("Credentials are not valid!");
+        }
 
         // Insert username and password into context
         SecurityContextHolder.getContext().setAuthentication(authentication);
