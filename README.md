@@ -78,7 +78,7 @@ Request:
 Response: 200 OK or exception
 
 ## Public Hello World
-```GET http://localhost:8080/api/public/hello-world```
+```GET http://localhost:8080/api/public/hello-world```  
 Everyone is authorized to use this endpoint  
 Response: ```Hello World from PUBLIC controller!```
 
@@ -93,7 +93,7 @@ Only users with role ```ROLE_USER``` can use this endpoint
 Response: ```Hello USER from PRIVATE controller!```
 
 ## Private Hello World for admins
-```GET http://localhost:8080/api/hello-world/admin```
+```GET http://localhost:8080/api/hello-world/admin```  
 Only users with role ```ROLE_ADMIN``` can use this endpoint  
 Response: ```Hello ADMIN from PRIVATE controller!```
 
