@@ -1,11 +1,19 @@
 package com.borisns.securitydemo.service.impl;
 
+import com.borisns.securitydemo.dto.UserDTO;
+import com.borisns.securitydemo.exception.ApiRequestException;
 import com.borisns.securitydemo.model.User;
+import com.borisns.securitydemo.model.UserTokenState;
 import com.borisns.securitydemo.repository.UserRepository;
+import com.borisns.securitydemo.security.TokenUtils;
+import com.borisns.securitydemo.security.auth.JwtAuthenticationRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +22,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -27,7 +37,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
+    private TokenUtils tokenUtils;
+
+    @Autowired
     private AuthenticationManager authenticationManager;
+
 
     /* Return User from database */
     @Override
@@ -58,5 +72,44 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = (User) loadUserByUsername(username);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    public UserDTO login(JwtAuthenticationRequest authenticationRequest) throws ApiRequestException {
+        Authentication authentication;
+        try {
+            authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(
+                            authenticationRequest.getUsername(),
+                            authenticationRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            throw new ApiRequestException("Credentials are not valid!");
+        }
+
+        // Insert username and password into context
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Create token
+        User user = (User) authentication.getPrincipal();
+        String jwt = tokenUtils.generateToken(user.getUsername());
+        int expiresIn = tokenUtils.getExpiredIn();
+
+        UserDTO userDto = new UserDTO(user);
+        userDto.setToken(new UserTokenState(jwt, expiresIn));
+
+        return userDto;
+    }
+
+    public UserTokenState refreshAuthenticationToken(HttpServletRequest request) throws ApiRequestException {
+        String token = tokenUtils.getToken(request);
+        String username = tokenUtils.getUsernameFromToken(token);
+        User user = (User) loadUserByUsername(username);
+
+        if (tokenUtils.canTokenBeRefreshed(token, user.getLastPasswordResetDate())) {
+            String refreshedToken = tokenUtils.refreshToken(token);
+            int expiresIn = tokenUtils.getExpiredIn();
+            return new UserTokenState(refreshedToken, expiresIn);
+        } else {
+            throw new ApiRequestException("Token can not be refreshed.");
+        }
     }
 }
