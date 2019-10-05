@@ -6,7 +6,6 @@ import com.borisns.securitydemo.model.User;
 import com.borisns.securitydemo.repository.UserRepository;
 import com.borisns.securitydemo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public UserDTO findById(Long id) throws AccessDeniedException {
+    public UserDTO findById(Long id) throws ApiRequestException {
         try {
             User user = userRepository.findById(id).get();
             return new UserDTO(user);
@@ -41,7 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> findAll() throws AccessDeniedException {
+    public List<UserDTO> findAll() {
         return userRepository.findAll().stream()
                 .map(user -> new UserDTO(user)).collect(Collectors.toList());
     }
