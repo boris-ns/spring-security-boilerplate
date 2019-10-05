@@ -1,12 +1,12 @@
 package com.borisns.securitydemo.service;
 
-import com.borisns.securitydemo.model.User;
+import com.borisns.securitydemo.dto.UserDTO;
 
 import java.util.List;
 
 public interface UserService {
 
-    User findById(Long id);
-    User findByUsername(String username);
-    List<User> findAll();
+    UserDTO findById(Long id);
+    UserDTO findByUsername(String username);
+    List<UserDTO> findAll();
 }
