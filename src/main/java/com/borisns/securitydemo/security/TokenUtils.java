@@ -17,10 +17,10 @@ import java.util.Date;
 @Component
 public class TokenUtils {
 
-    @Value("spring-security-demo")
+    @Value("app.name")
     private String APP_NAME;
 
-    @Value("super-secret-code-value")
+    @Value("app.secret-code")
     private String SECRET;
 
     @Value("3600000") // 1h

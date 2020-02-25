@@ -8,7 +8,7 @@ First, you need to clone this repository
 
 ```git clone https://github.com/boris-ns/spring-security-boilerplate.git```  
 
-Then in ```src/main/resources/application.properties``` enter your database name, username and password.  
+Then in ```src/main/resources/application.yml``` enter your database name, username and password.  
 
 After that, you can run the service
 
