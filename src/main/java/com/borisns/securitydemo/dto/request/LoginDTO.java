@@ -1,15 +1,20 @@
-package com.borisns.securitydemo.security.auth;
+package com.borisns.securitydemo.dto.request;
 
-public class JwtAuthenticationRequest {
+import javax.validation.constraints.NotNull;
 
+public class LoginDTO {
+
+    @NotNull(message = "Username is required")
     private String username;
+
+    @NotNull(message = "Password is required")
     private String password;
 
-    public JwtAuthenticationRequest() {
+    public LoginDTO() {
         super();
     }
 
-    public JwtAuthenticationRequest(String username, String password) {
+    public LoginDTO(String username, String password) {
         this.username = username;
         this.password = password;
     }

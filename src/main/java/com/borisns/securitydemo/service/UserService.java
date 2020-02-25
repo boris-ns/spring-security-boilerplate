@@ -1,6 +1,6 @@
 package com.borisns.securitydemo.service;
 
-import com.borisns.securitydemo.dto.UserDTO;
+import com.borisns.securitydemo.dto.response.UserDTO;
 
 import java.util.List;
 

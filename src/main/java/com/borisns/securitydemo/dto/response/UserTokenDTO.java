@@ -1,16 +1,16 @@
-package com.borisns.securitydemo.model;
+package com.borisns.securitydemo.dto.response;
 
-public class UserTokenState {
+public class UserTokenDTO {
 
     private String accessToken;
     private Long expiresIn;
 
-    public UserTokenState() {
+    public UserTokenDTO() {
         this.accessToken = null;
         this.expiresIn = null;
     }
 
-    public UserTokenState(String accessToken, long expiresIn) {
+    public UserTokenDTO(String accessToken, long expiresIn) {
         this.accessToken = accessToken;
         this.expiresIn = expiresIn;
     }

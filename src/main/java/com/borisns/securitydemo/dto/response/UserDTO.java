@@ -1,8 +1,7 @@
-package com.borisns.securitydemo.dto;
+package com.borisns.securitydemo.dto.response;
 
 import com.borisns.securitydemo.model.Authority;
 import com.borisns.securitydemo.model.User;
-import com.borisns.securitydemo.model.UserTokenState;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +15,7 @@ public class UserDTO {
     private String email;
     private boolean enabled;
     private List<String> authorities;
-    private UserTokenState token;
+    private UserTokenDTO token;
 
 
     public UserDTO(User user) {
@@ -88,11 +87,11 @@ public class UserDTO {
         this.authorities = authorities;
     }
 
-    public UserTokenState getToken() {
+    public UserTokenDTO getToken() {
         return token;
     }
 
-    public void setToken(UserTokenState token) {
+    public void setToken(UserTokenDTO token) {
         this.token = token;
     }
 }

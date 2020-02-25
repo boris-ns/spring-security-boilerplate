@@ -1,17 +1,15 @@
 package com.borisns.securitydemo.service.impl;
 
-import com.borisns.securitydemo.dto.UserDTO;
-import com.borisns.securitydemo.exception.ApiRequestException;
+import com.borisns.securitydemo.dto.response.UserDTO;
+import com.borisns.securitydemo.exception.exceptions.ApiRequestException;
 import com.borisns.securitydemo.model.User;
-import com.borisns.securitydemo.model.UserTokenState;
+import com.borisns.securitydemo.dto.response.UserTokenDTO;
 import com.borisns.securitydemo.repository.UserRepository;
 import com.borisns.securitydemo.security.TokenUtils;
-import com.borisns.securitydemo.security.auth.JwtAuthenticationRequest;
+import com.borisns.securitydemo.dto.request.LoginDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -74,7 +72,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public UserDTO login(JwtAuthenticationRequest authenticationRequest) throws ApiRequestException {
+    public UserDTO login(LoginDTO authenticationRequest) throws ApiRequestException {
         Authentication authentication;
         try {
             authentication = authenticationManager
@@ -94,12 +92,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         int expiresIn = tokenUtils.getExpiredIn();
 
         UserDTO userDto = new UserDTO(user);
-        userDto.setToken(new UserTokenState(jwt, expiresIn));
+        userDto.setToken(new UserTokenDTO(jwt, expiresIn));
 
         return userDto;
     }
 
-    public UserTokenState refreshAuthenticationToken(HttpServletRequest request) throws ApiRequestException {
+    public UserTokenDTO refreshAuthenticationToken(HttpServletRequest request) throws ApiRequestException {
         String token = tokenUtils.getToken(request);
         String username = tokenUtils.getUsernameFromToken(token);
         User user = (User) loadUserByUsername(username);
@@ -107,7 +105,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (tokenUtils.canTokenBeRefreshed(token, user.getLastPasswordResetDate())) {
             String refreshedToken = tokenUtils.refreshToken(token);
             int expiresIn = tokenUtils.getExpiredIn();
-            return new UserTokenState(refreshedToken, expiresIn);
+            return new UserTokenDTO(refreshedToken, expiresIn);
         } else {
             throw new ApiRequestException("Token can not be refreshed.");
         }

@@ -1,7 +1,7 @@
 package com.borisns.securitydemo.service.impl;
 
-import com.borisns.securitydemo.dto.UserDTO;
-import com.borisns.securitydemo.exception.ApiRequestException;
+import com.borisns.securitydemo.dto.response.UserDTO;
+import com.borisns.securitydemo.exception.exceptions.ApiRequestException;
 import com.borisns.securitydemo.model.User;
 import com.borisns.securitydemo.repository.UserRepository;
 import com.borisns.securitydemo.service.UserService;
